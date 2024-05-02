@@ -36,7 +36,6 @@ def chat(query, history):
         token_count = 0
         # 清空历史记录
         history = [{"role": "system", "content": prompt}]
-
     history += [{
         "role": "user",
         "content": query
@@ -48,16 +47,15 @@ def chat(query, history):
         temperature=0.3,
     )
     # 更新令牌计数器
-    token_count += completion["total_characters"]
+    token_count = completion.usage.total_tokens
 
     result = completion.choices[0].message.content
-
     history += [{
         "role": "assistant",
         "content": result
     }]
 
-    return result
+    return result, history
 
 
 def combine_strings(strings, min_words, max_words):
@@ -111,12 +109,11 @@ def generate_text(prompt, file_name, min_words, max_words):
     ]
     token_count = 0
     for text in text_list:
-        content = chat(text, history)
-
+        result, history = chat(text, history)
         # 打开文件以追加模式
         with open(os.path.join(dest_path, file_name), "a", encoding="utf-8") as file:
             # 写入内容
-            file.write(content)
+            file.write(result)
 
 if  __name__ == "__main__":
     source_path = "./source"
